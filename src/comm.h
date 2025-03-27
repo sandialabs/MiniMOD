@@ -62,20 +62,20 @@ int comm_allreduce(void*, void*, int, comm_datatype, comm_reduce_op);
 int comm_allgather(void*, int, comm_datatype, void*, int, comm_datatype);
 int comm_clean();
 
-#include"comm_mpi_pt2pt.h" 
+#include"communication/comm_mpi_pt2pt.h" 
 #ifdef HAVE_MPI_PART
-#include"comm_mpi_part.h" 
+#include"communication/comm_mpi_part.h" 
 #endif
 #ifdef HAVE_MPI_PCL
-#include"comm_mpi_pcl.h" 
+#include"communication/comm_mpi_pcl.h" 
 #endif
 #ifdef HAVE_OSHMEM
-#include"comm_openshmem.h" 
+#include"communication/comm_openshmem.h" 
 #endif
 #ifdef HAVE_CRAY_SHMEM
-#include"comm_crayshmem.h" 
+#include"communication/comm_crayshmem.h" 
 #endif
-#include"comm_mpi_pers.h" 
-#include"comm_mpi_rma.h"
+#include"communication/comm_mpi_pers.h" 
+#include"communication/comm_mpi_rma.h"
 
 #endif

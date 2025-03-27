@@ -27,8 +27,8 @@ int threads_synch      (threads_request*);
 int threads_begin_critical (threads_request*);
 int threads_end_critical   (threads_request*);
 
-#include"threads_openmp.h" 
-#include"threads_pthreads.h"
+#include"threading/threads_openmp.h" 
+#include"threading/threads_pthreads.h"
 
 
 

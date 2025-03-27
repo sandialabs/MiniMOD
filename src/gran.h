@@ -37,13 +37,13 @@ int gran_stencil_ready      (gran_request*, int direction, int entry);
 int gran_stencil_end        (gran_request*);
 int gran_stencil_finish     (gran_request*); 
 
-#include"gran_bulk.h" 
-#include"gran_fine.h"
-#include"gran_bins.h"
-#include"gran_bins_tmp.h"
-#include"gran_funn.h"
-#include"gran_offload.h"
-#include"gran_offload_bins.h"
-#include"gran_offload_bins_nminus.h"
+#include"granularity/gran_bulk.h" 
+#include"granularity/gran_fine.h"
+#include"granularity/gran_bins.h"
+#include"granularity/gran_bins_tmp.h"
+#include"granularity/gran_funn.h"
+#include"granularity/gran_offload.h"
+#include"granularity/gran_offload_bins.h"
+#include"granularity/gran_offload_bins_nminus.h"
 
 #endif

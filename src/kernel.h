@@ -31,22 +31,13 @@ int kernel_run();
 int kernel_clean();
 
 
-#include"kernel_sample.h" 
-#include"kernel_sample_thread.h"
-#include"kernel_sample_threads.h"
-#include"kernel_cmb.h"
-#include"kernel_collective_bench.h"
-#include"kernel_channel_bench.h"
-#include"kernel_gran_bench.h"
-#include"kernel_partsend.h"
-
-
-#ifdef HAVE_MINIMD
-#include"ljs.h"
-#endif
-
-#ifdef HAVE_MINIFE
-#include"main.hpp"
-#endif
+#include"kernel/kernel_sample.h" 
+#include"kernel/kernel_sample_thread.h"
+#include"kernel/kernel_sample_threads.h"
+#include"kernel/kernel_cmb.h"
+#include"kernel/kernel_collective_bench.h"
+#include"kernel/kernel_channel_bench.h"
+#include"kernel/kernel_gran_bench.h"
+#include"kernel/kernel_partsend.h"
 
 #endif
