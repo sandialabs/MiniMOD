@@ -1,7 +1,7 @@
 # MiniMOD
 A Modular HPC Communication Benchmark
 
-# Relevant Papers and How To Cite
+## Relevant Papers and How To Cite
 
 The MiniMOD Framework:
 Marts, W.P., Dosanjh, M.G., Levy, S., Schonbein, W., Grant, R.E. and Bridges, P.G., 2021, September. Minimod: A modular miniapplication benchmarking framework for hpc. In 2021 IEEE International Conference on Cluster Computing (CLUSTER) (pp. 12-22). IEEE.
