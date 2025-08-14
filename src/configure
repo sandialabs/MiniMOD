@@ -64,8 +64,8 @@ OBJ := obj
 kernel_objects = \$(OBJ)/kernel/kernel_sample.o \$(OBJ)/kernel/kernel_sample_thread.o \$(OBJ)/kernel/kernel_collective_bench.o \$(OBJ)/kernel/kernel_channel_bench.o \$(OBJ)/kernel/kernel_gran_bench.o \$(OBJ)/kernel/kernel_sample_threads.o \$(OBJ)/kernel/kernel_cmb.o \$(OBJ)/kernel/kernel_partsend.o
 kernel_headers = kernel/kernel_sample.h kernel/kernel_sample_thread.h kernel/kernel_collective_bench.h kernel/kernel_channel_bench.h kernel/kernel_gran_bench.h kernel/kernel_sample_threads.h kernel/kernel_cmb.h kernel/kernel_partsend.h
 
-granularity_objects = \$(OBJ)/granularity/gran_bulk.o \$(OBJ)/granularity/gran_fine.o \$(OBJ)/granularity/gran_bins.o \$(OBJ)/granularity/gran_bins_tmp.o \$(OBJ)/granularity/gran_funn.o \$(OBJ)/granularity/gran_offload.o \$(OBJ)/granularity/gran_offload_bins.o \$(OBJ)/granularity/gran_offload_bins_nminus.o
-granularity_headers = granularity/gran_bulk.h granularity/gran_fine.h granularity/gran_bins.h granularity/gran_bins_tmp.h granularity/gran_funn.h granularity/gran_offload.h granularity/gran_offload_bins.h granularity/gran_offload_bins_nminus.h
+granularity_objects = \$(OBJ)/granularity/gran_bulk.o \$(OBJ)/granularity/gran_fine.o \$(OBJ)/granularity/gran_bins.o \$(OBJ)/granularity/gran_bins_nminus.o \$(OBJ)/granularity/gran_offload.o \$(OBJ)/granularity/gran_offload_bins.o \$(OBJ)/granularity/gran_offload_bins_nminus.o
+granularity_headers = granularity/gran_bulk.h granularity/gran_fine.h granularity/gran_bins.h granularity/gran_bins_nminus.h granularity/gran_offload.h granularity/gran_offload_bins.h granularity/gran_offload_bins_nminus.h
 
 communication_objects = \$(OBJ)/communication/comm_mpi_pt2pt.o \$(OBJ)/communication/comm_mpi_rma.o \$(OBJ)/communication/comm_mpi_pers.o
 communication_headers = communication/comm_mpi_pt2pt.h communication/comm_mpi_rma.h communication/comm_mpi_pers.h
