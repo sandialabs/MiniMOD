@@ -1,9 +1,3 @@
-/* MiniMOD  1.0 - A modular communication benchmark 
- * Copyright (2025) National Technology  Engineering Solutions of Sandia, LLC (NTESS). 
- * Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains 
- * certain rights in this software. */
-
-
 #ifndef EARLYCOLL_H
 #define EARLYCOLL_H
 
@@ -27,10 +21,15 @@ struct MPIX_Request {
     int num_rounds;
     int* rounds;
     MPI_Comm comm;
+    MPI_Comm node_comm; // per node communicator for hierarchical algorithms
+    MPI_Comm leader_comm; // leader communicator for hierarchical algorithms
     MPI_Win win_rounds; // this is a round counter, it allows for the operations to continue once they have received data from the previous round (TODO - Evaluate if we might use this for direct as an completion counter)
     int* flags; 
     MPI_Win win_flags; // This is for R2S flags
     int *_recvbuf;  // This is a secondary buffer which allows us to do datacopy approaches. 
+    int *_labuf; // Internal local aggregator buffer for hierarchical algorithms
+    MPI_Win lawin; // local aggregator window using _labuf
+    MPI_Win rawin; // total aggregator window for hierarchical algorithms
 
     // The following are exclusively for point to point. We should eventually make a union of this and the rma since they're mutually exclusive but for research purposes the extra memory probably doesn't hurt. 
     int round_count; 

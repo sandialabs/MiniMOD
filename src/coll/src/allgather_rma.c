@@ -1,8 +1,3 @@
-/* MiniMOD  1.0 - A modular communication benchmark 
- * Copyright (2025) National Technology  Engineering Solutions of Sandia, LLC (NTESS). 
- * Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains 
- * certain rights in this software. */
-
 #include "earlycoll.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -113,6 +108,118 @@ void allgather_rma_recursive_doubling(MPIX_Request *req, int *sendbuf, int rank,
         if(partner < offset_rank) offset_rank = partner; // Update offest rank to the lowest set of the chunk we have. 
         mask <<= 1;
     }
+}
+
+void allgather_rma_init_hierarchical(MPIX_Request *req, int size, int rank, int *recvbuf, int chunk_size, MPI_Comm comm) {
+    req->size = size;
+    req->chunk_size = chunk_size;
+    req->recvbuf = recvbuf;
+    req->_recvbuf = malloc(size * sizeof(int));
+
+    char *ntasks = getenv("SLURM_NTASKS_PER_NODE");
+    int ranks_per_node;
+    if (ntasks != NULL) {
+        ranks_per_node = atoi(ntasks);
+    } else {
+        ranks_per_node = 1; // Some default if we can't find ntasks per node
+    }
+
+    // subcomm for per-node local data aggregation
+    int node = rank / ranks_per_node;
+    MPI_Comm node_comm;
+    MPI_Comm_split(comm, node, rank, &node_comm);
+    req->node_comm = node_comm;
+
+    // local_aggregator window creation
+    int node_size;
+    MPI_Comm_size(node_comm, &node_size);
+ 
+    req->_labuf = malloc(node_size * chunk_size * sizeof(int));
+
+    MPI_Win local_aggregator;
+    req->lawin = local_aggregator;
+
+    // Create local aggregator window
+    MPI_Win_create(req->_labuf, node_size * chunk_size * sizeof(int), sizeof(int), MPI_INFO_NULL, req->node_comm, &req->lawin);
+
+    // set leader ranks to make leader comm from node comm
+    int local_rank;
+    MPI_Comm_rank(node_comm, &local_rank);
+
+    int leader = 0;
+    if (local_rank != 0) {
+        leader = MPI_UNDEFINED;
+    }
+
+    // subcomm for leaders to perform internode communication.
+    MPI_Comm leader_comm;
+    MPI_Comm_split(node_comm, leader, rank, &leader_comm);
+    req->leader_comm = leader_comm;
+
+    // Aggregation window for internode communication
+    MPI_Win_create(req->_recvbuf, size * sizeof(int), sizeof(int), MPI_INFO_NULL, req->leader_comm, &req->rawin);
+
+    // Window for leader back to local ranks
+    MPI_Win_create(req->recvbuf, size * sizeof(int), sizeof(int), MPI_INFO_NULL, req->node_comm, &req->win);
+
+    MPI_Win_fence(0, req->lawin);
+}
+
+void allgather_rma_hierarchical(MPIX_Request *req, int *sendbuf, int rank, int chunk_size, int total_processes) {
+    // Local in-buffer, per rank. Assume consistent at start (ready to use for writing). Local leader aggregator buffer. Assume inconsistent to start (ready to be written to)
+    int local_rank, local_size;
+    MPI_Comm_rank(req->node_comm, &local_rank);
+    MPI_Comm_size(req->node_comm, &local_size);
+
+
+    int leader = 0;
+    // Local Aggregator steps to move data into single rank on node
+    // sendbuf is consistent, do put to local per-node leader. Use leader_local_rank, as we will use local node communicator for this window
+    if (local_rank == 0){
+        memcpy(req->_labuf, sendbuf, chunk_size * sizeof(int));
+    } else {
+        MPI_Put(sendbuf, chunk_size, MPI_INT, leader, local_rank * chunk_size, chunk_size, MPI_INT, req->lawin);
+    }
+    // 'flip' consistency states. local aggregator LA now consistent.
+    MPI_Win_fence(0, req->lawin);
+
+
+    int leader_size = 0;
+    int leader_rank;
+    // Proceed for leaders to write from local aggregator buf to total aggregator window
+    if (local_rank == 0){
+
+        MPI_Comm_size(req->leader_comm, &leader_size);
+        MPI_Comm_rank(req->leader_comm, &leader_rank);
+
+        for (int target_leader = 0; target_leader < leader_size; target_leader++) {
+            MPI_Put(req->_labuf, local_size * chunk_size, MPI_INT, target_leader, leader_rank * local_size * chunk_size, local_size * chunk_size, MPI_INT, req->rawin);
+        }
+    }
+
+    MPI_Win_fence(0, req->rawin);
+
+    // Each leader now will write to recvbuf for each rank. total aggregator _recvbuf is consistent
+    if (local_rank == 0) {
+        for (int dest_rank = 0; dest_rank < local_size; dest_rank++) {
+            MPI_Put(req->_recvbuf, chunk_size * local_size * leader_size, MPI_INT, dest_rank, 0, chunk_size * local_size * leader_size, MPI_INT, req->win);
+        }
+    }
+
+    MPI_Win_fence(0, req->win);
+
+
+}
+
+void allgather_rma_hierarchical_wait(MPIX_Request *req) {
+    MPI_Win_fence(0, req->lawin);
+}
+
+void allgather_rma_hierarchical_free(MPIX_Request *req) {
+    MPI_Win_free(&req->rawin);
+    MPI_Win_free(&req->lawin);
+    MPI_Win_free(&req->win);
+    free(req->_labuf);
 }
 
 // Global array and its size
@@ -370,6 +477,11 @@ void MPIX_Allgather_init(int *sendbuf, int chunk_size, int *recvbuf, MPI_Comm co
             request->operation_func = allgather_rma_bruck_rounds_datacopy;
             request->wait_func = allgather_rma_wait_bruck_rounds_datacopy;
             request->free_func = allgather_rma_free_rounds;
+        /*} else if (strcmp(algorithm, "hierarchical") == 0) {
+            allgather_rma_init_hierarchical(request, chunk_size * size, rank, recvbuf, chunk_size, comm);
+            request->operation_func = allgather_rma_hierarchical;
+            request->wait_func = allgather_rma_hierarchical_wait;
+	    request->free_func = allgather_rma_hierarchical_free;*/
         } else {
             fprintf(stderr, "MPIX_allgather_init Unknown algorithm: %s\n", algorithm);
             MPI_Abort(comm, 1);

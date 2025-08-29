@@ -1,8 +1,3 @@
-/* MiniMOD  1.0 - A modular communication benchmark 
- * Copyright (2025) National Technology  Engineering Solutions of Sandia, LLC (NTESS). 
- * Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains 
- * certain rights in this software. */
-
 #include "earlycoll.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +31,7 @@ void benchmark_algorithm(const char *operation, const char *algorithm, int *send
         fprintf(stderr, "Unknown operation: %s\n", operation);
         MPI_Abort(comm, 1);
     }
+
 
     for (int i = 0; i < iterations; i++) {
         MPI_Barrier(comm);
@@ -91,6 +87,7 @@ void benchmark_operation(const char *operation, int *sendbuf, int *recvbuf, int 
     if (strcmp(operation, "alltoall") == 0) {
         benchmark_algorithm(operation, "direct", sendbuf, recvbuf, chunk_size, iterations, comm, delay_rank, delay_amount);
         benchmark_algorithm(operation, "pairwise", sendbuf, recvbuf, chunk_size, iterations, comm, delay_rank, delay_amount);
+        //benchmark_algorithm(operation, "hierarchical", sendbuf, recvbuf, chunk_size, iterations, comm, delay_rank, delay_amount);
     } else if (strcmp(operation, "broadcast") == 0) {
         benchmark_algorithm(operation, "direct", sendbuf, recvbuf, chunk_size, iterations, comm, delay_rank, delay_amount);
         benchmark_algorithm(operation, "recursive_doubling", sendbuf, recvbuf, chunk_size, iterations, comm, delay_rank, delay_amount);
@@ -98,6 +95,7 @@ void benchmark_operation(const char *operation, int *sendbuf, int *recvbuf, int 
         benchmark_algorithm(operation, "direct", sendbuf, recvbuf, chunk_size, iterations, comm, delay_rank, delay_amount);
         benchmark_algorithm(operation, "recursive_doubling", sendbuf, recvbuf, chunk_size, iterations, comm, delay_rank, delay_amount);
         benchmark_algorithm(operation, "bruck", sendbuf, recvbuf, chunk_size, iterations, comm, delay_rank, delay_amount);
+	//benchmark_algorithm(operation, "hierarchical", sendbuf, recvbuf, chunk_size, iterations, comm, delay_rank, delay_amount);
     } else {
         fprintf(stderr, "Unknown operation: %s\n", operation);
         MPI_Abort(comm, 1);
@@ -132,7 +130,7 @@ int main(int argc, char *argv[]) {
 
         // Allocate and initialize send buffer
         sendbuf = (int *)malloc(total_elements * sizeof(int));
-	recvbuf = (int *)malloc(total_elements * sizeof(int));
+	    recvbuf = (int *)malloc(total_elements * sizeof(int));
         for (int i = 0; i < total_elements; i++) {
             sendbuf[i] = rank * total_elements + i; // Example data
         }
