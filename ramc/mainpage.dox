@@ -1,0 +1,45 @@
+/**
+* @mainpage RAMC: Remote Access Memory Channels
+*
+* Yadda Yadda Yadda
+* 
+* @section Introduction
+* Remote Access Memory Channels (RAMC) is an experimental library to explore 
+* RMA applications through a simple unidirectional RMA channel building block.
+* The primary innovations are (i) 
+* not following a monolithic synchronized window creation wherein every participating 
+* process exposes a target window; (ii) lazy (or pairwise) synchronization that avoids 
+* synchonizing fences; (iii) a version of RMA with notification that avoids 
+* traditional explicit notification by leveraging Slingshot NIC hardware counters.
+*
+* @section Installation
+* Currently RAMC only works on HPE Cray Slingshot systems, as it relies on 
+* Slingshot-specific capabilities.
+*
+* @section ToDo
+*
+* \todo Do we need a destroy function for the initiator?
+*
+* \todo Implement an active target solution. In this paradigm, the iniatior waits for a signal 
+* (a zero-byte write) from a target indicating it is OK-TO-READ or OK-TO_WRITE.
+*
+* \todo Does RAMC need a progress engine? E.g., each initiator could keep track of 
+* outstanding operations. There is a sense in which this is already taken care of but 
+* we could layer tracking individual requests on top (although under the hood they would 
+* be completed in bulk).
+*
+* \todo Current code uses a FI_CHECK macro to test for errors on OFI calls; however, this just 
+* prints an error and then either aborts or keeps going, so there is no way to handle an error. We need a better 
+* way to handle errors in OFI calls.
+*
+* \todo Do we want support for a 'reference count' option (instead of using counters) to 
+* accommodate cases where we don't know how many initiators will be accessing a BB or 
+* interacting with a target? Not sure what this would look like...
+*
+* \todo Currently target windows are registered with OFI for REMOTE_READs and 
+* REMOTE_WRITEs (and maybe atomics?). Do we want to expand these options (e.g., allowing for 
+* local reads and writes), or expose the options through the RAMC API?
+*
+* \todo Selecting an appropriate NIC: this is currently hard coded and assumes 
+* running on Eldorado. Generalizing would be a big lift but...
+*/
